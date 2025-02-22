@@ -1,0 +1,56 @@
+# config.yaml
+project:
+  name: "TeleQaFinetune"
+  experiment_version: "1.0.0"
+
+data:
+  train_path_1: "data/TeleQnA_training.txt"
+  train_path_2: "data/Q_A_ID_training.csv"
+  rag_file_path: "data/train_with_rag_ranked_filtered.csv"
+  index_dir: "indexes"
+  index_name: "teleqa_256_faiss_openai_bge_base_v1.5"
+  test_size: 0.1
+  random_state: 42
+
+model:
+  name: "microsoft/phi-2"
+  torch_dtype: "float32"
+
+bits_and_bytes:
+  load_in_4bit : True
+  bnb_4bit_quant_type : 'nf4'
+  bnb_4bit_compute_dtype : 'float16'
+  bnb_4bit_use_double_quant : True
+
+device:
+  name: "cuda"
+
+lora:
+  r: 16
+  lora_alpha: 32
+  target_modules:
+    - "Wqkv"
+    - "fc1"
+    - "fc2"
+    - 'q_proj'
+    - 'k_proj'
+    - 'v_proj'
+    - 'dense'
+  bias: "none"
+  lora_dropout: 0.05
+  task_type: 'CAUSAL_LM'
+
+training:
+  steps_save_eval_loss: 100
+  number_step_partitions: 100
+  warmup_steps: 250
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 2
+  learning_rate: 1.0e-3
+  optim: "paged_adamw_8bit"
+  num_train_epochs: 5
+
+wandb:
+  enabled: true
+  project: "TeleQaFinetune"
